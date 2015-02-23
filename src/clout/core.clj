@@ -37,16 +37,14 @@
       (:uri request)))
 
 (defprotocol Route
-  (route-matches [route request]
-    "If the route matches the supplied request, the matched keywords are
+  (route-matches [route path]
+    "If the route matches the supplied path, the matched keywords are
     returned as a map. Otherwise, nil is returned."))
 
 (defrecord CompiledRoute [source re keys absolute?]
   Route
-  (route-matches [_ request]
-    (let [path-info (if absolute?
-                      (request-url request)
-                      (path-info request))
+  (route-matches [_ path]
+    (let [path-info path
           matcher   (re-matcher re path-info)]
       (if (.matches matcher)
         (assoc-keys-with-groups (re-groups* matcher) keys))))
@@ -122,5 +120,5 @@
 
 (extend-type String
   Route
-  (route-matches [route request]
-    (route-matches (route-compile route) request)))
+  (route-matches [route path]
+    (route-matches (route-compile route) path)))
